@@ -50,6 +50,17 @@ class ComboBoxMenu(urwid.WidgetWrap):
         self.__super.__init__(urwid.AttrWrap(urwid.Filler(
                         urwid.LineBox(self.walker)), "selectable", _STYLE))
 
+    def keypress(self, size, key):
+        """Intercept keystroke when the menu is popped.
+        The focus will be set to the entry whose label starts with 
+        the letter pressed on the keyboard"""
+        for item in sorted(self.items):
+            ix = self.items.index(item)
+            if item.get_label().lower().startswith(key):
+                self.walker.set_focus(self.items[ix])
+                break
+        return super(ComboBoxMenu, self).keypress(size, key)
+
     def append(self, item):
         """Append an item to the menu
 
