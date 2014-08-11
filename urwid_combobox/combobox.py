@@ -58,6 +58,7 @@ class ComboBoxMenu(urwid.WidgetWrap):
             ix = self.items.index(item)
             if item.get_label().lower().startswith(key):
                 self.walker.set_focus(self.items[ix])
+                break
         return super(ComboBoxMenu, self).keypress(size, key)
 
     def append(self, item):
