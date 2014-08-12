@@ -49,7 +49,7 @@ class ComboBoxMenu(urwid.WidgetWrap):
         self._nav_iter = cycle([])
         for i in items:
             self.append(i)
-        self.walker = urwid.Pile(self.items)
+        self.walker = urwid.Pile(sorted(self.items))
         self.__super.__init__(urwid.AttrWrap(urwid.Filler(
                         urwid.LineBox(self.walker)), "selectable", _STYLE))
 
@@ -59,9 +59,10 @@ class ComboBoxMenu(urwid.WidgetWrap):
         the letter pressed on the keyboard"""
         if self._nav_search_key != key.lower():
             self._nav_search_key = key.lower()
-            nav_candidates = [ w for w in \
-                                     sorted(self.items) if \
-                                     w.get_label().lower().startswith(key.lower()) ]
+            nav_candidates = [ w for w in sorted(self.items, \
+                                                 key=lambda cb: cb.get_label().lower()) if \
+                               w.get_label().lower().startswith(key.lower())]
+
             self._nav_iter = cycle(sorted(nav_candidates))
         try:
             nf = self._nav_iter.next()
