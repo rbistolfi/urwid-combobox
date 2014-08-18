@@ -11,6 +11,7 @@ __all__ = [ "ComboBox" ]
 
 import urwid
 from urwid.command_map import command_map
+from itertools import cycle
 
 
 _STYLE = "popbg"
@@ -44,6 +45,8 @@ class ComboBoxMenu(urwid.WidgetWrap):
         """
         self.group = []
         self.items = []
+        self._nav_search_key = None
+        self._nav_iter = cycle([])
         for i in items:
             self.append(i)
         self.walker = urwid.Pile(self.items)
@@ -54,11 +57,20 @@ class ComboBoxMenu(urwid.WidgetWrap):
         """Intercept keystroke when the menu is popped.
         The focus will be set to the entry whose label starts with 
         the letter pressed on the keyboard"""
-        for item in sorted(self.items):
-            ix = self.items.index(item)
-            if item.get_label().lower().startswith(key):
-                self.walker.set_focus(self.items[ix])
-                break
+        if self._nav_search_key != key.lower():
+            self._nav_search_key = key.lower()
+            nav_candidates = []
+            for entry in self.walker.contents:
+                if entry[0].get_label().lower().startswith(key.lower()):
+                    nav_candidates.append(self.walker.contents.index(entry))
+            self._nav_iter = cycle(sorted(nav_candidates))
+        try:
+            nf = self._nav_iter.next()
+            self.walker.set_focus(self.walker.contents[nf][0])
+
+
+        except StopIteration, e:
+            return super(ComboBoxMenu, self).keypress(size, key)
         return super(ComboBoxMenu, self).keypress(size, key)
 
     def append(self, item):
